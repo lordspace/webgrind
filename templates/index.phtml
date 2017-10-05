@@ -360,24 +360,29 @@
 				</div>
 				<div style="float:right;">
 					<label style="margin:0 5px">of</label>
-					<select id="dataFile" name="dataFile" style="width:70%">
+					<select id="dataFile" name="dataFile" style="width:75%">
 						<option value="0">Auto (newest)</option>
 						<?php
 						$profiler_dir = ini_get('xdebug.profiler_output_dir');
                                                 // normalize path
                                                 $profiler_dir = preg_replace('#[\\\/]+#si', '/', $profiler_dir);
+						$partialOutputName = ini_get('xdebug.profiler_output_name');
+                                                $partialOutputName = preg_replace('#^(.*?)(\%.*)#si', '${1}', $partialOutputName);
 						?>
 						<?php foreach(Webgrind_FileHandler::getInstance()->getTraceList() as $trace):?>
 							<?php
 							$file_shortened = str_replace(array('%i','%f','%s','%m'), array($trace['invokeUrl'],$trace['filename'],$trace['filesize'],$trace['mtime']),Webgrind_Config::$traceFileListFormat);
                                                         $file_shortened = preg_replace('#[\\\/]+#si', '/', $file_shortened);
 
-							if (!empty($profiler_dir)) {
-                                                            $file_shortened = str_replace($profiler_dir, '', $file_shortened);
-							}
+                                                        // rm profiler dir from filename
+                                                        $file_shortened = str_replace($profiler_dir, '', $file_shortened);
+                                                        
+                                                        // remove the name prefix cachegrind.out.trace-
+                                                        $file_shortened = str_replace($partialOutputName, '', $file_shortened);
                                                         
                                                         // remove the leaving path to the doc root
                                                         $file_shortened = preg_replace('#^.*?(www|public_html|ht(tps?)?docs)/#si', '/', $file_shortened);
+                                                        
 							?>
 							<option value="<?php echo $trace['filename']?>"><?php echo $file_shortened; ?></option>
 						<?php endforeach;?>
