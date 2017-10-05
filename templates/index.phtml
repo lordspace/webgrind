@@ -360,11 +360,26 @@
 				</div>
 				<div style="float:right;">
 					<label style="margin:0 5px">of</label>
-					<select id="dataFile" name="dataFile" style="width:200px">
+					<select id="dataFile" name="dataFile" style="width:70%">
 						<option value="0">Auto (newest)</option>
+						<?php
+						$profiler_dir = ini_get('xdebug.profiler_output_dir');
+                                                // normalize path
+                                                $profiler_dir = preg_replace('#[\\\/]+#si', '/', $profiler_dir);
+						?>
 						<?php foreach(Webgrind_FileHandler::getInstance()->getTraceList() as $trace):?>
-							<!-- <option value="<?php echo $trace['filename']?>"><?php echo $trace['invokeUrl']?> (<?php echo $trace['filename']?>) [<?php echo $trace['filesize']?>]</option> -->
-							<option value="<?php echo $trace['filename']?>"><?php echo str_replace(array('%i','%f','%s','%m'),array($trace['invokeUrl'],$trace['filename'],$trace['filesize'],$trace['mtime']),Webgrind_Config::$traceFileListFormat); ?></option>
+							<?php
+							$file_shortened = str_replace(array('%i','%f','%s','%m'), array($trace['invokeUrl'],$trace['filename'],$trace['filesize'],$trace['mtime']),Webgrind_Config::$traceFileListFormat);
+                                                        $file_shortened = preg_replace('#[\\\/]+#si', '/', $file_shortened);
+
+							if (!empty($profiler_dir)) {
+                                                            $file_shortened = str_replace($profiler_dir, '', $file_shortened);
+							}
+                                                        
+                                                        // remove the leaving path to the doc root
+                                                        $file_shortened = preg_replace('#^.*?(www|public_html|ht(tps?)?docs)/#si', '/', $file_shortened);
+							?>
+							<option value="<?php echo $trace['filename']?>"><?php echo $file_shortened; ?></option>
 						<?php endforeach;?>
 					</select>
 					<img class="list_reload" src="img/reload.png" onclick="reloadFilelist()">
