@@ -99,7 +99,7 @@ class Webgrind_Config extends Webgrind_MasterConfig {
     static function xdebugOutputFormat() {
         $outputName = ini_get('xdebug.profiler_output_name');
         if ($outputName=='') // Ini value not defined
-            $outputName = '/^cachegrind\.out\..+$/';
+            $outputName = '/^cachegrind\.out\..+$/si';
         else
             $outputName = '/^'.preg_replace('/(%[^%])+/', '.+', $outputName).'$/';
         return $outputName;
@@ -110,9 +110,12 @@ class Webgrind_Config extends Webgrind_MasterConfig {
      */
     static function xdebugOutputDir() {
         $dir = ini_get('xdebug.profiler_output_dir');
-        if ($dir=='') // Ini value not defined
+        
+        if (empty($dir)) { // Ini value not defined
             return realpath(Webgrind_Config::$profilerDir).'/';
-        return realpath($dir).'/';
+        }
+        
+        return realpath($dir) . '/';
     }
 
     /**
